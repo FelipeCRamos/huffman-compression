@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 typedef unsigned short int bit;
 typedef unsigned char byte;
