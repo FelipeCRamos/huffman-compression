@@ -17,7 +17,7 @@ DOCDIR = ./Documentation
 CC = g++	# for compatibility
 CFLAGS = -Wall -g -ggdb -std=c++14 -I. -I$(INCDIR)
 RM = -rm
-PROJ_NAME = huffman-compression
+PROJ_NAME = huf
 
 HEADERS := $(wildcard $(INCDIR)/*)
 SOURCES := $(wildcard $(SRCDIR)/*.cpp)

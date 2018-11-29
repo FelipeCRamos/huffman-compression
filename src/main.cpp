@@ -1,30 +1,39 @@
 #include <iostream>
-#include "bit_manipulation.h"
 #include "io.h"
-#include "huffenc.h"
+#include "util.h"
+#include "dig-tree.h"
 
 int main(int argc, char **argv){
 
-    byte randum = 0b00100111;
-    std::vector<bit> num = read(randum);
+    // temporary work around, TODO: implement an argv read
+    std::string file = read_file("assets/default.txt");
+    std::cout << "File content:" << std::endl;
+    std::cout << "------------------------------" << std::endl;
+    std::cout << file << std::endl;
+    std::cout << "------------------------------" << std::endl;
 
-    // print the randum
-    for( auto &i : num ) {
-        std::cout << i;
+    std::vector<count_node> stats = count(file);
+
+    std::cout << "@ Stats:\n";
+    for( auto &it : stats ) {
+        std::cout << "'" << it.first << "': " << it.second << std::endl;
     }
     std::cout << std::endl;
 
-    std::string file = read_file("test.txt");
-    std::cout << file << std::endl;
+    Tree s = Tree(stats);
 
-    // for( int i = 0; i < file.size(); i++ ) {
-    //     for( auto &b : read(file[i]) ){
-    //         std::cout << b;
-    //     }
-    //     std::cout << " -> " << file[i] << std::endl;
-    /* } */
+    std::cout << "Compressed tree:\n";
+    std::cout << s.print() << std::endl;
 
-    encode(file);
+    std::cout << "Bit representations:\n";
+    for( auto &it : stats ){
+        std::list<bit> char_bits = s.encode(it.first);
+        std::cout << "'" << it.first << "': ";
+        for( auto &bit : char_bits ){
+            std::cout << bit;
+        }
+        std::cout << std::endl;
+    }
 
     return 0;
 }
