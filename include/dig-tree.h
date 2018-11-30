@@ -10,92 +10,93 @@
 class Tree
 {
     private:
+        /*
         typedef struct node_s {
             // content
             unsigned long int key;
-            size_t m_count;
+            size_t freq;
             // bool is_char;
 
             // pointers
             node_s *left = nullptr;
             node_s *right = nullptr;
         } Node;
+        */
 
-        Node *m_root;
-        size_t m_size;
+        charInfo *m_root;
 
     public:
         // Constructors/Destructors
-        Tree(std::vector<count_node> ifs);
+        Tree(std::vector<charInfo> ifs);
         ~Tree();
 
         // Print tree (debug)
         std::string print();
 
         // encode a given char with the tree
-        std::list<bit> encode(char ch);
-        bool i_search( char ch, Node * i_curr, std::list<bit> &i_path );
+        std::vector<bit> encode(char ch);
+        bool i_search( char ch, charInfo * i_curr, std::vector<bit> &i_path );
 };
 
-Tree::Tree(std::vector<count_node> ifs)
+Tree::Tree(std::vector<charInfo> ifs)
 {
-    auto cmp = [](count_node const &a, count_node const &b)
+    /* Heap that will store the nodes */
+    std::priority_queue<
+        charInfo *,
+        std::vector<charInfo *>,
+        bool (*)(charInfo *, charInfo *)
+    > node_list_t(charInfo_cmp);
+
+    // debug print
+    if( false )
     {
-        return a.first != b.first ? a.second > b.second : a.first > b.first;
-    };
-
-    std::sort(ifs.begin(), ifs.end(), cmp);
-
-    std::list<Node *> node_list;
-
-    for( auto &it : ifs ){
-        // std::cout << "-> " << it.first << ", " << it.second << std::endl;
-        Node * a = new Node;
-        a->key = it.first;
-        a->m_count = it.second;
-        node_list.push_back(a);
-        ifs.pop_back();
+        std::cout << "Constructor debug: [ ";
+        for(auto &i : ifs) std::cout << "(" << i.key << "," << i.freq << ") ";
+        std::cout << "]\n";
     }
 
+    /* Create a heap of charInfo pointers */
+    for( auto &it : ifs ) node_list_t.push(new charInfo(it.key, it.freq));
 
-    while(node_list.size() > 1)
+    if( false ) print_queue(node_list_t);  // debug print
+
+    while(node_list_t.size() > 1)
     {
         // create the temporary right node
-        Node * t_right = node_list.back();
-        node_list.pop_back();
+        charInfo * t_right = node_list_t.top();
+        node_list_t.pop();
 
         // create the temporary left node
-        Node * t_left = node_list.back();
-        node_list.pop_back();
+        charInfo * t_left = node_list_t.top();
+        node_list_t.pop();
 
         // create the "father" node
-        Node * t_father = new Node;
+        charInfo * t_father = new charInfo;
 
         // link father with both sons
         t_father->left = t_left;
         t_father->right = t_right;
 
         // updates father stats
-        t_father->m_count = t_left->m_count + t_right->m_count;
+        t_father->freq = t_left->freq + t_right->freq;
         t_father->key = '\0';   // default father key
 
         // re-inserts the father into the end of the list
-        node_list.push_back(t_father);
+        node_list_t.push(t_father);
 
         // update m_root with last father
         this->m_root = t_father;
-        this->m_size += 3;
     }
 }
 
 Tree::~Tree(void)
 {
-    std::queue<Node *> to_delete;
+    std::queue<charInfo *> to_delete;
     if( this->m_root != nullptr ){
         to_delete.push(this->m_root);
         while(!to_delete.empty())
         {
-            Node *actual = to_delete.front();
+            charInfo *actual = to_delete.front();
             to_delete.pop();
             if( actual->left != nullptr ){
                 to_delete.push(actual->left);
@@ -112,15 +113,15 @@ Tree::~Tree(void)
 std::string Tree::print()
 {
     std::string buf;
-    std::queue<Node *> to_print;
-    if(this->m_root == nullptr || this->m_size == 0){
+    std::queue<charInfo *> to_print;
+    if(this->m_root == nullptr){
         return buf;
     }
 
     to_print.push(this->m_root);
     while(!to_print.empty())
     {
-        Node *actual = to_print.front();
+        charInfo *actual = to_print.front();
         to_print.pop();
 
         std::string c;
@@ -130,7 +131,7 @@ std::string Tree::print()
             c = "\0";
         }
 
-        buf += "('" + c + "'," + std::to_string(actual->m_count) + "), ";
+        buf += "('" + c + "'," + std::to_string(actual->freq) + "), ";
 
         if(actual->left != nullptr){
             to_print.push(actual->left);
@@ -144,23 +145,22 @@ std::string Tree::print()
     return buf;
 }
 
-std::list<bit> Tree::encode(char ch)
+std::vector<bit> Tree::encode(char ch)
 {
     // first, we will search inside the tree for the given char
-    std::list<bit> m_path;
-    Node *curr = this->m_root;
-    bool found = i_search(ch, curr, m_path);
+    std::vector<bit> m_path;
 
-    // std::cout << "Final result: " << found << std::endl;
+    charInfo *curr = this->m_root;
 
-    // for( auto &it : m_path ){
-        // std::cout << it;
-    // }
+    /* bool found = */ i_search(ch, curr, m_path);
+
+    // simple reverse, so the path will be from root -> leaf
+    std::reverse(m_path.begin(), m_path.end());
 
     return m_path;
 }
 
-bool Tree::i_search( char ch, Node * i_curr, std::list<bit> &i_path )
+bool Tree::i_search( char ch, charInfo * i_curr, std::vector<bit> &i_path )
 {
     if( i_curr != nullptr ){
         // check if the current node * is the right one
@@ -171,13 +171,13 @@ bool Tree::i_search( char ch, Node * i_curr, std::list<bit> &i_path )
             bool result = i_search(ch, i_curr->left, i_path);
 
             if( result ){
-                i_path.push_front(0);
+                i_path.push_back(0);
                 return true;
             } else {
                 // drop down on right sub-tree
                 bool r2 = i_search(ch, i_curr->right, i_path);
                 if( r2 ){
-                    i_path.push_front(1);
+                    i_path.push_back(1);
                     return true;
                 }
             }
@@ -185,6 +185,7 @@ bool Tree::i_search( char ch, Node * i_curr, std::list<bit> &i_path )
     } else {
         return false;
     }
+    return false;
 }
 
 #endif

@@ -12,11 +12,11 @@ int main(int argc, char **argv){
     std::cout << file << std::endl;
     std::cout << "------------------------------" << std::endl;
 
-    std::vector<count_node> stats = count(file);
+    std::vector<charInfo> stats = count(file);
 
     std::cout << "@ Stats:\n";
     for( auto &it : stats ) {
-        std::cout << "'" << it.first << "': " << it.second << std::endl;
+        std::cout << "'" << it.key << "': " << it.freq << std::endl;
     }
     std::cout << std::endl;
 
@@ -27,8 +27,8 @@ int main(int argc, char **argv){
 
     std::cout << "Bit representations:\n";
     for( auto &it : stats ){
-        std::list<bit> char_bits = s.encode(it.first);
-        std::cout << "'" << it.first << "': ";
+        std::vector<bit> char_bits = s.encode(it.key);
+        std::cout << "'" << it.key<< "': ";
         for( auto &bit : char_bits ){
             std::cout << bit;
         }

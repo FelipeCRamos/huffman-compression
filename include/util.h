@@ -5,11 +5,42 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include <list>
 #include <map>
 
 /* Bit manipulation related */
 typedef unsigned short int bit;
 typedef unsigned char byte;
+
+/* Char "Node" */
+typedef struct charInfo_s {
+    unsigned char key;          //!< Holds the character
+    unsigned long int freq;     //!< Holds the char's frequency
+
+    charInfo_s *left = nullptr;     //!< Pointer to left node
+    charInfo_s *right = nullptr;    //!< Pointer to right node
+
+    charInfo_s(){/* */};
+    charInfo_s(unsigned char k, unsigned long int f) : key(k), freq(f) {/* */};
+} charInfo;
+
+/* Compare function for the heap creation */
+bool charInfo_cmp( charInfo *a, charInfo *b )
+{
+    // Will return if a.freq > b.freq, if they're equal, return a.key > b.key
+    return a->key != b->key ? a->freq > b->freq : a->key > b->key;
+}
+
+/* Simple heap print, for debug purporse */
+template<typename T>
+void print_queue(T q) {
+    std::cout << "[ ";
+    while(!q.empty()) {
+        std::cout << "(" << q.top()->key << "," << q.top()->freq << ") ";
+        q.pop();
+    }
+    std::cout << "]\n";
+}
 
 //!< Converts an unsigned char -> vector of bits
 std::vector<bit> read(unsigned char n)
@@ -32,9 +63,9 @@ std::vector<bit> read(unsigned char n)
 typedef std::pair<char, int> count_node;
 
 //!< Count the string, returning how many times each char appeared. <char, int>
-std::vector<count_node> count(std::string org_str)
+std::vector<charInfo> count(std::string org_str)
 {
-    std::map<char, int> stats;
+    std::map<unsigned char, unsigned long int> stats;
 
     for(auto &ch : org_str)
     {
@@ -51,20 +82,19 @@ std::vector<count_node> count(std::string org_str)
     // Now, stats have the number of times each char appeared. But we need to
     // sort it out.
 
-    std::vector<count_node> ordered_stats;
+    std::vector<charInfo> ordered_stats;
 
     // populate ordered_stats with the pairs
-    for( auto &p : stats )
-        ordered_stats.push_back(std::make_pair(p.first, p.second));
-
-    // simple compare lambda function
-    auto count_node_comp = [](count_node const &a, count_node const &b)
-    {
-        return a.first != b.first ? a.second < b.second : a.first < b.first;
-    };
+    for( auto &p : stats ){
+        charInfo tmp;
+        tmp.key = p.first;
+        tmp.freq = p.second;
+        ordered_stats.push_back(tmp);
+    }
 
     // sort the ordered_stats & return it.
-    std::sort(ordered_stats.begin(), ordered_stats.end(), count_node_comp);
+    // std::sort(ordered_stats.begin(), ordered_stats.end(), charInfo_comp);
+    
     return ordered_stats;   
 }
 
