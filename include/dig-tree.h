@@ -10,18 +10,6 @@
 class Tree
 {
     private:
-        /*
-        typedef struct node_s {
-            // content
-            unsigned long int key;
-            size_t freq;
-            // bool is_char;
-
-            // pointers
-            node_s *left = nullptr;
-            node_s *right = nullptr;
-        } Node;
-        */
 
         charInfo *m_root;
 
@@ -44,7 +32,7 @@ Tree::Tree(std::vector<charInfo> ifs)
     std::priority_queue<
         charInfo *,
         std::vector<charInfo *>,
-        bool (*)(charInfo *, charInfo *)
+        bool (*)(const charInfo *, const charInfo *)
     > node_list_t(charInfo_cmp);
 
     // debug print

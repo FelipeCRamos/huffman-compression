@@ -25,7 +25,7 @@ typedef struct charInfo_s {
 } charInfo;
 
 /* Compare function for the heap creation */
-bool charInfo_cmp( charInfo *a, charInfo *b )
+bool charInfo_cmp( const charInfo *a, const charInfo *b )
 {
     // Will return if a.freq > b.freq, if they're equal, return a.key > b.key
     return a->key != b->key ? a->freq > b->freq : a->key > b->key;
@@ -43,7 +43,7 @@ void print_queue(T q) {
 }
 
 //!< Converts an unsigned char -> vector of bits
-std::vector<bit> read(unsigned char n)
+std::string read(unsigned char n)
 {
     std::vector<bit> buf;
     unsigned short int bit_count = 8;
@@ -55,7 +55,9 @@ std::vector<bit> read(unsigned char n)
     }
 
     std::reverse(buf.begin(), buf.end());   // reverse to get the actual order
-    return buf;
+    std::string r;
+    for( auto &i : buf ) r += std::to_string(i);
+    return r;
 }
 
 
