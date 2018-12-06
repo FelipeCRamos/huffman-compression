@@ -73,4 +73,40 @@ namespace BIT
 
         return finalStr;
     }
+
+    void printBits( std::string name, std::string ifs )
+    {
+        std::cout << name << ":\n";
+        std::cout << "-------------------------------\n";
+        for( int i = 0; i < ifs.size(); i++ )
+        {
+            if( ifs[i] == '\0' )
+                std::cout << "\e[35m";
+
+            std::cout << BIT::getBits(ifs[i]) << " ";
+
+            if( ifs[i] == '\0' )
+                std::cout << "\e[0m";
+
+            if( (i+1)% 6 == 0 ) std::cout << "\n";
+        }
+        std::cout << std::endl;
+        std::cout << "-------------------------------\n";
+
+    }
+
+    void printLikeBits( std::string name, std::string ifs )
+    {
+        std::cout << name << ":\n";
+        std::cout << "-------------------------------\n";
+        for( int i = 0; i < ifs.size(); i++ )
+        {
+            std::cout << ifs[i] << ((i+1) % 8 == 0 ? " " : "");
+
+            if( (i+1)% (8*6) == 0 ) std::cout << "\n";
+        }
+        std::cout << std::endl;
+        std::cout << "-------------------------------\n";
+
+    }
 }

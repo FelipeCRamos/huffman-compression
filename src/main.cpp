@@ -27,7 +27,7 @@ int main( int argc, char **argv ) {
 
 
     // opens the file stream & read's from input file stream
-    std::ifstream file(inputFilename, std::ios::in);
+    std::ifstream file(inputFilename, std::ios::binary);
     std::string fileContent = IO::read(file);
     file.close();
 

@@ -10,19 +10,11 @@ namespace COMPRESS
         std::string pseudoBinTree = tree.preOrder();
         binData = BIT::genBinary(pseudoBinTree);
 
-        std::cout << "\n\nBinData Header:\n";
-        for( int i = 1; i < binData.size() + 1; i++ ) {
-            std::cout << BIT::getBits(binData[i-1]) << " ";
-            if( i % 6 == 0 ) std::cout << "\n";
-        }
-        std::cout << std::endl;
-         
-        // Get the delimiter
-        for( auto &ch : getDelimiter() ){
-            std::string buf = BIT::getBits(ch);
-            binData += BIT::genBinary(buf);
-        }
-        
+        // insert delimiter
+        binData += (char)0b00000000;
+
+        BIT::printBits( "BinData Header", binData );
+
         // Get the actual data on compressed binary representation
         for( auto &ch : is )
         {
@@ -37,6 +29,8 @@ namespace COMPRESS
             binData += BIT::genBinary(pathToChar_str);
         }
 
+        BIT::printBits( "Final compressed data", binData );
+
         return binData;
     }
 
@@ -47,7 +41,6 @@ namespace COMPRESS
 
     std::string uncompress( std::string &is )
     {
-        std::cout << "null bits: " << BIT::getBits('\0') << std::endl;
         // get the raw bits from file
         std::string sBits;
         for( size_t i = 0; i < is.size(); i++ )
@@ -60,7 +53,9 @@ namespace COMPRESS
 
         // function to seek next 8 bits, if they're all 0's, return true;
         auto seek = [](std::string::iterator it, std::string st) {
+            // std::cout << "\nseek: ";
             for( int i = 0; i < 8; i++ ) {
+                // std::cout << *it;
                 if( it != st.end() ){
                     if( *it == '1' ) {
                         return false;
@@ -94,17 +89,34 @@ namespace COMPRESS
                 }
 
                 // c should be now with the corresponding char
+                intrStr += "'";
                 intrStr += c;
+                intrStr += "'";
             }
+
             if(seek(curr, sBits)) break;
         }
 
-        std::cout << "\nuncompressed header:"
+        std::cout << "distance " << std::distance(sBits.begin(), curr) << std::endl;
+
+        // not working properly!!
+        std::advance(curr, 8+7);  // advance 8 bits
+
+        std::string compressedDataBits;
+        while( curr != sBits.end() )
+        {
+            compressedDataBits += *curr;
+            std::advance( curr, 1 );
+        }
+
+        std::cout << "\nExtracted Header:"
             << "\n-------------------------\n" 
             << intrStr 
             << "\n-------------------------"
             << std::endl;
 
+
+        BIT::printLikeBits( "Extracted Data", compressedDataBits );
 
         return std::string("stub");
     }

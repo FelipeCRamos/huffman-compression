@@ -16,6 +16,9 @@ namespace COMPRESS
 
     //!< Get delimiter between header and data
     std::string getDelimiter( void );
+
+    void printBits( std::string name, std::string ifs );
+    void printLikeBits( std::string name, std::string ifs );
 }
 
 #endif

@@ -12,6 +12,12 @@ namespace BIT
 
     //!< Get a string with the bits in a given char
     std::string getBits( unsigned char n );
+
+    //!< Print actual ifs bits
+    void printBits( std::string name, std::string ifs );
+    
+    //!< Print string ifs as bits
+    void printLikeBits( std::string name, std::string ifs );    
 }
 
 #endif
