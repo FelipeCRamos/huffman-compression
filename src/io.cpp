@@ -11,6 +11,7 @@ std::string read_file(std::string filename)
     char c = ifs.get();
 
     while(ifs.good()){
+        printf("%i ", c);
         buf += c;
         c = ifs.get();
     }

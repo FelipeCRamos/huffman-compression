@@ -89,14 +89,10 @@ Tree::Tree(std::vector<charInfo> ifs)
 }
 /*}}}*/
 
-charInfo * Tree::getLeftier(charInfo *curr)
-{
-    
-}
-
 Tree::Tree(std::string &cmp_tree)
 /*{{{*/
 {
+
     // transcode the string with char's to a list with bits (true/false)
     std::list<bool> bits_cmp_tree;
     for( auto &c : cmp_tree )
@@ -112,6 +108,7 @@ Tree::Tree(std::string &cmp_tree)
     charInfo * rnode;
     charInfo * p_node;
     while( curr != bits_cmp_tree.end() )
+    {
         if( *curr == false ) {
             charInfo * curr_node = new charInfo();
 
@@ -125,8 +122,6 @@ Tree::Tree(std::string &cmp_tree)
 
         std::advance(curr, 1);
     }
-    
-
 }
 /*}}}*/
 
