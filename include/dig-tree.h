@@ -1,32 +1,43 @@
 #ifndef _digtree_h_
 #define _digtree_h_
 
-#include <iostream>
-#include <vector>
-#include <list>
-#include "util.h"
-#include <queue>
+#include <iostream>     // std::cout, std::endl
+#include <vector>       // std::vector<T>
+#include <list>         // std::list<T>
+#include <stack>        // std::stack<T>
+#include <queue>        // std::queue<T>
+#include "util.h"       // Useful functions and declarations for the imp
 
 class Tree
+/*{{{*/
 {
     private:
 
         charInfo *m_root;
 
+        // recurssive function to make preorder string
+        void r_print_preorder(charInfo * curr, std::string &acc);
+
     public:
         // Constructors/Destructors
         Tree(std::vector<charInfo> ifs);
+        Tree(std::string &cmp_tree);
+
         ~Tree();
 
-        // Print tree (debug)
-        std::string print();
+        // Print functions
+        std::string print();            // print by level
+        std::string print_preorder();   // print by preorder (root, left, right)
 
         // encode a given char with the tree
         std::vector<bit> encode(char ch);
+
         bool i_search( char ch, charInfo * i_curr, std::vector<bit> &i_path );
 };
+/*}}}*/
 
 Tree::Tree(std::vector<charInfo> ifs)
+/*{{{*/
 {
     /* Heap that will store the nodes */
     std::priority_queue<
@@ -76,8 +87,51 @@ Tree::Tree(std::vector<charInfo> ifs)
         this->m_root = t_father;
     }
 }
+/*}}}*/
+
+charInfo * Tree::getLeftier(charInfo *curr)
+{
+    
+}
+
+Tree::Tree(std::string &cmp_tree)
+/*{{{*/
+{
+    // transcode the string with char's to a list with bits (true/false)
+    std::list<bool> bits_cmp_tree;
+    for( auto &c : cmp_tree )
+    {
+        for( auto &i : m_read(c) )
+        {
+            bits_cmp_tree.push_back(i == '1' ? true : false);
+        }
+    }
+
+    std::list<bool>::iterator curr = bits_cmp_tree.begin();
+
+    charInfo * rnode;
+    charInfo * p_node;
+    while( curr != bits_cmp_tree.end() )
+        if( *curr == false ) {
+            charInfo * curr_node = new charInfo();
+
+            // if the root is empty, set to the curr_node
+            if( this->m_root == nullptr ) this->m_root = curr_node;
+
+            p_node = curr_node; // set the just built node as the prev
+        } else {
+            // ler o char
+        }
+
+        std::advance(curr, 1);
+    }
+    
+
+}
+/*}}}*/
 
 Tree::~Tree(void)
+/*{{{*/
 {
     std::queue<charInfo *> to_delete;
     if( this->m_root != nullptr ){
@@ -97,8 +151,10 @@ Tree::~Tree(void)
         }
     }
 }
+/*}}}*/
 
 std::string Tree::print()
+/*{{{*/
 {
     std::string buf;
     std::queue<charInfo *> to_print;
@@ -132,8 +188,49 @@ std::string Tree::print()
 
     return buf;
 }
+/*}}}*/
+
+void Tree::r_print_preorder(charInfo * curr, std::string &acc)
+/*{{{*/
+{
+    if( curr == nullptr )
+        return;
+
+    // send to print the curr
+    std::string c;
+    if( curr->key != '\0' ){
+        c = "1";
+        c += curr->key;
+    } else {
+        c = "0";
+    }
+
+    acc += c;
+
+    // send to print the left tree
+    this->r_print_preorder(curr->left, acc);
+    
+    // send to print the right tree
+    this->r_print_preorder(curr->right, acc);
+}
+/*}}}*/
+
+std::string Tree::print_preorder()
+/*{{{*/
+{
+    std::string buf;
+    if( this->m_root == nullptr ){
+        return buf;
+    }
+
+    this->r_print_preorder(this->m_root, buf);
+
+    return buf;
+}
+/*}}}*/
 
 std::vector<bit> Tree::encode(char ch)
+/*{{{*/
 {
     // first, we will search inside the tree for the given char
     std::vector<bit> m_path;
@@ -147,8 +244,10 @@ std::vector<bit> Tree::encode(char ch)
 
     return m_path;
 }
+/*}}}*/
 
 bool Tree::i_search( char ch, charInfo * i_curr, std::vector<bit> &i_path )
+/*{{{*/
 {
     if( i_curr != nullptr ){
         // check if the current node * is the right one
@@ -175,5 +274,6 @@ bool Tree::i_search( char ch, charInfo * i_curr, std::vector<bit> &i_path )
     }
     return false;
 }
+/*}}}*/
 
 #endif
