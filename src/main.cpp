@@ -54,19 +54,31 @@ int main( int argc, char **argv ) {
             std::cout << std::endl;
         }
 
-        std::cout << "PreOrder Representation of the Tree: "
-            << store_tree.preOrder() << std::endl;
+        std::cout << "PreOrder Representation of the Tree:"
+            << "\n-------------------------\n" 
+            << store_tree.preOrder() 
+            << "\n-------------------------" 
+            << std::endl;
     }
 
     // Start to compress things
     std::string bits = COMPRESS::compress(fileContent, store_tree);
 
-    std::cout << "Generated bits:\n" << bits << std::endl;
+    // std::cout << "Generated bits:\n" << bits << std::endl;
 
     // opens the output file stream & write's to it
     std::ofstream output_file(outputFilename, std::ofstream::out);
     IO::write(output_file, bits);
     output_file.close();
+
+
+    // Uncompress stuff
+
+    std::ifstream compressed_file(outputFilename, std::ifstream::in);
+    std::string compressed_content = IO::read(compressed_file);
+    compressed_file.close();
+
+    std::string uncmp = COMPRESS::uncompress(compressed_content);
 
     return 0;
 }

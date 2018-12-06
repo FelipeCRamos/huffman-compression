@@ -11,7 +11,8 @@ namespace IO
         while(ifs.good())
         {
             c = ifs.get();
-            content += c;
+            if( c != '\0' )
+                content += c;
         }
 
         // delete last digit
