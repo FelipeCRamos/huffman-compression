@@ -1,102 +1,72 @@
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <vector>
+
+#include "node.h"
 #include "io.h"
-#include "util.h"
-#include "dig-tree.h"
+#include "compress.h"
+#include "digital-tree.h"
+#include "counter.h"
+#include "bits.h"
+
 #define debug true
 
-int main(int argc, char **argv)
-{
-    if( argc != 3 ){
-        std::cerr << "Please, run with correct number of arguments, like:\n";
-        std::cerr << "\t./huf path/to/input.in path/to/output.out";
+int main( int argc, char **argv ) {
+    std::string inputFilename;
+    std::string outputFilename;
+
+    if( argc < 3 ) {          // [program] [input_file] [output_file] = 3
+        std::cerr << "Please, run the program with correct parameters.\n";
+        std::cerr << "I.E.:\n\t./huf path/to/input.in path/to/output.out\n";
+        return 1;
     }
 
-    // temporary work around, TODO: implement an argv read
-    std::string file = read_file(argv[1]);
-    std::cout << "File content:" << std::endl;
-    std::cout << "------------------------------" << std::endl;
-    std::cout << file << std::endl;
-    std::cout << "------------------------------" << std::endl;
+    inputFilename = argv[1];
+    outputFilename = argv[2];
 
-    // count all chars, returning how many times each one of them appeared
-    std::vector<charInfo> stats = count(file);
 
-    std::cout << "\n@ Stats:\n";
-    for( auto &it : stats ) {
-        std::cout << "'" << it.key << "': " << it.freq << std::endl;
-    }
+    // opens the file stream & read's from input file stream
+    std::ifstream file(inputFilename, std::ios::in);
+    std::string fileContent = IO::read(file);
+    file.close();
 
-    // Generate the Digital Tree with the charInfo
-    Tree encoded_tree = Tree(stats);
+    // Will generate each char statistics
+    std::vector<Node *> stats = COUNTER::generateStats(fileContent);
+
+    // generates the digital tree with the stats
+    DigitalTree store_tree(stats);
 
     if(debug)
     {
-        std::cout << "\nCompressed tree:\n";
-        // print what each node has
-        std::cout << encoded_tree.print() << std::endl;
-
-        // print the tree on pre-order
-        std::cout << "\nStored tree:\n" << encoded_tree.print_preorder()
-            << std::endl;
-    }
-
-    // will store all char's path once looked
-    std::vector<std::string> bit_table(128);
-
-    // original representation bits counter
-    long int o_bits = 0;
-
-    std::cout << "\nOriginal representation:\n";
-    for( auto &c : file ){
-        std::cout << m_read(c) << " ";
-        o_bits += m_read(c).size();
-    }
-    std::cout << std::endl;
-    std::cout << "bits used: " << o_bits << std::endl;
-
-
-    // compressed representation bits counter
-    long int c_bits = 0;
-    std::cout << "\nCompressed representations:\n";
-    for( auto &it : stats ){
-        
-        /* get the compressed binary of a given char (it.key) */
-        std::vector<bit> char_bits = encoded_tree.encode(it.key);
-
-        /* generate binary string */
-        std::string binaryStr;
-        for( auto &bit : char_bits ) binaryStr += std::to_string(bit);
-
-        /* Store the already calculated binaryStr to the bit_table */
-        bit_table[it.key] = binaryStr;
-
-        if(debug)
-        {
-            // Get the compressed binary representation of all char's
-            std::cout << "'" << it.key << "': ";
-            std::cout << bit_table[it.key] << std::endl;
+        std::cout << "Count results:" << std::endl;
+        for( auto &i : stats ){
+            std::cout << "\t~ '" << i->key << "': " << i->freq;
+            std::cout << " | bits: ";
+            std::vector<bool> binStr = store_tree.pathTo(i->key);
+            for( int i = 0; i < binStr.size(); i++ ) {
+                if( binStr[i] ) {
+                    std::cout << "1";
+                } else {
+                    std::cout << "0";
+                }
+            }
+            std::cout << std::endl;
         }
+
+        std::cout << "PreOrder Representation of the Tree: "
+            << store_tree.preOrder() << std::endl;
     }
 
-    // Generate file compressed binary representation, store-it on compressed_bits
-    std::string compressed_bits;
+    // Start to compress things
+    std::string bits = COMPRESS::compress(fileContent, store_tree);
 
-    // for each char in the file, get his compressed binary string and store-it
-    for( auto &c : file ){
-        std::cout << bit_table[c] << " ";
+    std::cout << "Generated bits:\n" << bits << std::endl;
 
-        compressed_bits += bit_table[c]; // get the already calculated binStr
-        c_bits += bit_table[c].size();   // just for debugging purposes
-    }
-    std::cout << std::endl;
-    std::cout << "bits used: " << c_bits << std::endl;
-
-    // std::string output_filename = "teste.out";  // TODO: implement with argv
-
-    write_file(argv[2], encoded_tree.print_preorder(), compressed_bits);
-
-    std::cout << "\nSuccessfully compressed to '" << argv[2] << "'\n";
+    // opens the output file stream & write's to it
+    std::ofstream output_file(outputFilename, std::ofstream::out);
+    IO::write(output_file, bits);
+    output_file.close();
 
     return 0;
 }
