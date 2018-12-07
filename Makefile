@@ -14,8 +14,9 @@ BINDIR = ./bin
 DOCDIR = ./Documentation
 
 # Macros
-CC = g++	# for compatibility
+CC = g++	# for compatibility, but preferable clang++
 CFLAGS = -Wall -g -ggdb -std=c++14 -I. -I$(INCDIR)
+							# ^^^
 RM = -rm
 PROJ_NAME = huf
 

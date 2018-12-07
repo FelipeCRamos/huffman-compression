@@ -1,5 +1,7 @@
 #include "compress.h"
 
+#define debug false
+
 namespace COMPRESS
 {
     std::string compress(std::string &is, DigitalTree &tree)
@@ -14,7 +16,7 @@ namespace COMPRESS
         binData += (char)0b00000000;
         binData += (char)0b11111111;
 
-        // BIT::printBits( "BinData Header", binData );
+        if(debug) BIT::printBits( "BinData Header", binData );
         
         auto compress_this = [](std::string &tmp_bits)
         {
@@ -59,14 +61,17 @@ namespace COMPRESS
 
         binData += compress_this(pathToChar_str);
 
-        // BIT::printBits( "Final compressed data", binData );
+        if( debug ) {
+            BIT::printBits( "Final compressed data", binData );
+        }
 
         return binData;
     }
 
     std::string getDelimiter()
     {
-        return "\0";
+        // same as 00000000 11111111
+        return "\0" + std::to_string((char)0b11111111);
     }
 
     std::pair<std::string,std::string> uncompress( std::string &is )
@@ -77,16 +82,14 @@ namespace COMPRESS
             // get the bits of the char
             sBits += BIT::getBits(is[i]);
 
-        bool char_next = false;
         std::string::iterator curr = sBits.begin();
-        std::string intrStr;
+        std::string headerBits;
 
         // function to seek next 8 bits, if they're all 0's, return true;
+        //                  (curr + 7)
         auto seek = [](std::string::iterator it, std::string st) {
-            // std::cout << "\nseek: ";
             for( int i = 0; i < 8; i++ ) {
-                // std::cout << *it;
-                if( it != st.end() ){
+                if( it != st.end() ) {
                     if( *it == '1' ) {
                         return false;
                     }
@@ -99,14 +102,15 @@ namespace COMPRESS
         while( curr != sBits.end() )
         {
             if( *curr == '0' ) {
-                intrStr += '0';
+                headerBits += '0';
                 std::advance(curr, 1);
 
             } else {
                 // it means `*curr == 1`
-                intrStr += '1';
+                headerBits += '1';
 
-                std::advance(curr, 1); // leaves curr in the first bit of 8 bit
+                // increment curr position to match 1st bit of the char
+                std::advance(curr, 1); 
                 
                 char c = '\0';
                 // generate the char of 8 bits
@@ -114,67 +118,52 @@ namespace COMPRESS
                 {
                     c = c << 1;
                     if( *curr == '1' ) c += 0b00000001;
+
+                    // advance iterator to next position
                     if( curr != sBits.end() )
                         std::advance(curr, 1);
                 }
 
-                // c should be now with the corresponding char
-                intrStr += c;
+                // char c should now be ready
+                headerBits += c;
             }
 
-            auto valid_seek = curr;
-            size_t count = 0;
-            if(seek(curr, sBits)){
-                while( seek(curr, sBits) ){
-                    std::cout << std::distance(sBits.begin(), curr) << std::endl;
-                    std::advance(curr, 1);
-                }
+            // If we find the delimiter char (check on getDelimiter), should be
+            // in the following configuration:
+            // Example:
+            // ..0000 00000000 11111111
+            //   ^~ Actual bit (curr iterator)
+            if( seek(curr, sBits) ) {
+                // Then, we will iterate until get here:
+                // ..0000 00000000 11111111
+                //        ^~ Desired bit
+                while( seek(curr, sBits) ) std::advance(curr, 1);
+
+                // and finally, advance to:
+                // ..0000 00000000 11111111 _
+                //                          ^- First bit after delimiter
                 std::advance(curr, 8+7);
+
+                // and exit while loop
                 break;
             }
         }
 
-        // not working properly!!
-        // do {
-            // std::advance(curr, 8);
-        // } while(seek(curr, sBits));
-        // std::advance(curr, 8+2+2+1);  // advance 8 bits
-
-        std::string compressedDataBits;
+        std::string dataBits;
         while( curr != sBits.end() )
         {
-            compressedDataBits += *curr;
+            dataBits += *curr;
             std::advance( curr, 1 );
         }
 
-        std::cout << "\nExtracted Header:"
-            << "\n-------------------------\n"
-            << intrStr
-            << "\n-------------------------"
-            << std::endl;
-
-
-        BIT::printLikeBits( "Extracted Data", compressedDataBits );
-
-        return std::make_pair(intrStr, compressedDataBits);
-    }
-
-    std::string decodeString( std::string &is, DigitalTree &tree )
-    {
-        auto it = is.begin();
-
-        while(it != is.end()) 
-        {
-            // will generate a char with next 8 bits
-            char c = '\0';
-            for( int i = 0; i < 8; i++ )
-            {
-                c = c << 1;
-                if( *it == '1' ) c += 0b00000001;
-
-                std::advance(it, 1);
-            }
+        if( debug ) {
+            // print the header bits
+            BIT::printLikeBits( "Extracted Header Bits", headerBits );
+            
+            // print data bits
+            BIT::printLikeBits( "Extracted Data Bits", dataBits );
         }
-    }
 
+        return std::make_pair(headerBits, dataBits);
+    }
 }
