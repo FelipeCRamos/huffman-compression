@@ -22,12 +22,12 @@ Making sure that:
 + You have permissions to write on `output` file
 
 ## Details of implementation
-This project uses concepts of prefixed digital tree's to generate the shorter
+This project uses concepts of tries to generate the shorter
 possible binary path to a given char, based on how many occurrences it has on
 the given input. With this being done, we can represent a normal 8 bits `char`
 with 4~5 bits (depending on the input).
 
-Here's a briefly explanation about how the prefixed digital tree:
+Here's a briefly explanation about how the prefixed tree (trie):
 ```
 Suppose we have a small text like: "bom esse bombom", we can extract the following info:
     char 'b' appears 3 times
