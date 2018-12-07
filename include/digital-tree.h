@@ -3,6 +3,7 @@
 
 #include <queue>
 #include <vector>
+#include <utility>
 
 #include "node.h"
 
@@ -17,12 +18,17 @@ class DigitalTree
         //!< Recurssive function to get the path to char
         bool genPathToChar( unsigned char ch, Node * curr, std::vector<bool> &i_path );
 
-        //!< Internal recurssive function to print pre-order traversal
-        void i_preOrder(Node * curr, std::string &acc);
+        //!< Internal recursive function to print pre-order traversal
+        void i_preOrder( Node * curr, std::string &acc );
+
+        Node * genTree( std::queue<std::pair<bool, char>> & node_list );
 
     public:
         //!< Constructs the tree by a given vector of node pointers
         DigitalTree(std::vector<Node *> &tree_content);
+
+        //!< Constructs the tree by a given preorder traversal path
+        DigitalTree(std::string &preord);
 
         //!< Destructs the tree
         ~DigitalTree();
@@ -32,6 +38,9 @@ class DigitalTree
 
         //!< Get pre-order traversal representation of the tree
         std::string preOrder();
+
+        //!< Decode a given binary str
+        std::string decode(std::string & _str);
 };
 
 #endif

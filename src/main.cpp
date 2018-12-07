@@ -78,7 +78,12 @@ int main( int argc, char **argv ) {
     std::string compressed_content = IO::read(compressed_file);
     compressed_file.close();
 
-    std::string uncmp = COMPRESS::uncompress(compressed_content);
+    std::pair<std::string,std::string> retur = COMPRESS::uncompress(compressed_content);
+
+    DigitalTree UncmpTree = DigitalTree(retur.first);
+    std::cout << "Preorder uncompressed:\n" << UncmpTree.preOrder() << std::endl;
+
+    std::cout << UncmpTree.decode(retur.second) << std::endl;
 
     return 0;
 }

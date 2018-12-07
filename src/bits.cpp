@@ -54,6 +54,14 @@ namespace BIT
         return finalStr;
     }
 
+    std::string genBinary_str( std::string &is )
+    {
+        for( size_t i = 0; i < is.size(); i++ )
+        {
+
+        }
+    }
+
     std::string getBits( unsigned char n )
     {
         std::vector<bool> tmp; 

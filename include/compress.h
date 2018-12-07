@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
 #include "digital-tree.h"
 #include "bits.h"
 
@@ -12,13 +13,10 @@ namespace COMPRESS
     std::string compress( std::string &is, DigitalTree &tree );
 
     //!< Uncompress from a real binary level to a string containing all bits
-    std::string uncompress( std::string &is );
+    std::pair<std::string, std::string> uncompress( std::string &is );
 
     //!< Get delimiter between header and data
     std::string getDelimiter( void );
-
-    void printBits( std::string name, std::string ifs );
-    void printLikeBits( std::string name, std::string ifs );
 }
 
 #endif

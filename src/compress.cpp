@@ -13,23 +13,52 @@ namespace COMPRESS
         // insert delimiter
         binData += (char)0b00000000;
 
-        BIT::printBits( "BinData Header", binData );
+        // BIT::printBits( "BinData Header", binData );
+        
+        auto compress_this = [](std::string &tmp_bits)
+        {
+            // convert to char bits level
+            std::string finalStr;
+
+            unsigned short int mod = 0;
+            unsigned char curr = '\0';
+
+            for( size_t i = 0; i < tmp_bits.size(); i++ )
+            {
+                curr = curr << 1;   // shift left
+                if( tmp_bits[i] == '1' ) curr += 1;    // set last bit as 1
+                mod++;
+
+                if( mod == 8 ) {
+                    mod = 0;    // reset mod counter
+
+                    // push the just made char to finalStr, reset's the char
+                    finalStr.push_back(curr);
+                    curr = '\0';
+                }
+            }
+            // Now the string it's almost done, but we need to make sure there's no
+            // remaining bits that wasn't thrown at the finalStr
+            if( mod >= 1 ) {
+                curr = curr << (8-mod); // populate the char with (8-mod) bits 0's
+                finalStr.push_back(curr);
+            }
+            return finalStr;
+        };
 
         // Get the actual data on compressed binary representation
+        std::string pathToChar_str;
         for( auto &ch : is )
         {
             // get the path to a given char on the tree
             std::vector<bool> pathToChar = tree.pathTo(ch);
-
-            std::string pathToChar_str;
             for( int i = 0; i < pathToChar.size(); i++ )
                 pathToChar_str += pathToChar[i] ? '1' : '0';
-
-            // iterate through the path, sending to the 
-            binData += BIT::genBinary(pathToChar_str);
         }
 
-        BIT::printBits( "Final compressed data", binData );
+        binData += compress_this(pathToChar_str);
+
+        // BIT::printBits( "Final compressed data", binData );
 
         return binData;
     }
@@ -39,7 +68,7 @@ namespace COMPRESS
         return "\0";
     }
 
-    std::string uncompress( std::string &is )
+    std::pair<std::string,std::string> uncompress( std::string &is )
     {
         // get the raw bits from file
         std::string sBits;
@@ -89,18 +118,14 @@ namespace COMPRESS
                 }
 
                 // c should be now with the corresponding char
-                intrStr += "'";
                 intrStr += c;
-                intrStr += "'";
             }
 
             if(seek(curr, sBits)) break;
         }
 
-        std::cout << "distance " << std::distance(sBits.begin(), curr) << std::endl;
-
         // not working properly!!
-        std::advance(curr, 8+7);  // advance 8 bits
+        std::advance(curr, 8);  // advance 8 bits
 
         std::string compressedDataBits;
         while( curr != sBits.end() )
@@ -110,14 +135,33 @@ namespace COMPRESS
         }
 
         std::cout << "\nExtracted Header:"
-            << "\n-------------------------\n" 
-            << intrStr 
+            << "\n-------------------------\n"
+            << intrStr
             << "\n-------------------------"
             << std::endl;
 
 
         BIT::printLikeBits( "Extracted Data", compressedDataBits );
 
-        return std::string("stub");
+        return std::make_pair(intrStr, compressedDataBits);
     }
+
+    std::string decodeString( std::string &is, DigitalTree &tree )
+    {
+        auto it = is.begin();
+
+        while(it != is.end()) 
+        {
+            // will generate a char with next 8 bits
+            char c = '\0';
+            for( int i = 0; i < 8; i++ )
+            {
+                c = c << 1;
+                if( *it == '1' ) c += 0b00000001;
+
+                std::advance(it, 1);
+            }
+        }
+    }
+
 }

@@ -46,6 +46,41 @@ DigitalTree::DigitalTree(std::vector<Node *> &tree_content)
     this->path_to_leaf.resize(256);
 }
 
+DigitalTree::DigitalTree(std::string & preord)
+{
+    std::queue< std::pair<bool, char> > addList;
+    auto it = preord.begin();
+    while( it != preord.end() )
+    {
+        if( *it == '0' ) {
+            addList.push(std::make_pair(false, '\0'));
+        } else {
+            std::advance(it, 1);
+            addList.push(std::make_pair(true, *it));
+        }
+        std::advance(it, 1);
+    }
+
+    this->m_root = genTree( addList );
+}
+
+Node * DigitalTree::genTree( std::queue<std::pair<bool, char>> & node_list )
+{
+    if( node_list.size() < 1 ) return nullptr;
+
+    std::pair<bool, char> curr(node_list.front());
+    node_list.pop();
+
+    if( !curr.first ) {
+        Node * m_left = genTree(node_list);
+        Node * m_right = genTree(node_list);
+
+        return new Node('\0', m_left, m_right);
+    } else {
+        return new Node(curr.second, nullptr, nullptr);
+    }
+}
+
 DigitalTree::~DigitalTree()
 {
     std::queue<Node *> to_delete;
@@ -153,4 +188,40 @@ void DigitalTree::i_preOrder(Node * curr, std::string & acc)
     // now send to both directions
     this->i_preOrder(curr->left, acc);
     this->i_preOrder(curr->right, acc);
+}
+
+std::string DigitalTree::decode( std::string & _str )
+{
+    std::string decoded_str; 
+
+    Node * curr_node = this->m_root;
+
+    auto curr = _str.begin();
+    std::cout << _str << std::endl;
+    while( curr != _str.end() )
+    {
+        // first, check if not already on a leaf
+        if( curr_node->left == nullptr && curr_node->right == nullptr )
+        {
+            std::cout << "\tgot-it " << curr_node->key << std::endl;
+            decoded_str += curr_node->key;  // add the curr_node char to the str
+            curr_node = this->m_root;       // reset curr_node to the root
+
+            std::advance( curr, 1 );
+            continue;
+        }
+            
+        if( *curr == '1' ) {
+            std::cout << "diggin right\n";
+            // dig right
+            curr_node = curr_node->right;
+        } else if ( *curr == '0' ) {
+            std::cout << "diggin left\n";
+            // dig left
+            curr_node = curr_node->left;
+        }
+
+        std::advance(curr, 1);
+    }
+    return decoded_str;
 }
