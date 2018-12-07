@@ -75,7 +75,7 @@ int main( int argc, char **argv ) {
     // Uncompress stuff
 
     std::ifstream compressed_file(outputFilename, std::ifstream::in);
-    std::string compressed_content = IO::read(compressed_file);
+    std::string compressed_content = IO::read_c(compressed_file);
     compressed_file.close();
 
     std::pair<std::string,std::string> retur = COMPRESS::uncompress(compressed_content);

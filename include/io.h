@@ -9,6 +9,9 @@ namespace IO
     /* Read content from an ifstream object */
     std::string read(std::ifstream &ifs);
 
+    /* Read content from an ifstream object (compressed) */
+    std::string read_c(std::ifstream &ifs);
+
     /* Write content to an ofstream object */
     bool write(std::ofstream &ofs, std::string content);
 }

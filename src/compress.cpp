@@ -125,7 +125,7 @@ namespace COMPRESS
         }
 
         // not working properly!!
-        std::advance(curr, 8);  // advance 8 bits
+        std::advance(curr, 8+2+2+1);  // advance 8 bits
 
         std::string compressedDataBits;
         while( curr != sBits.end() )

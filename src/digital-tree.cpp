@@ -196,32 +196,30 @@ std::string DigitalTree::decode( std::string & _str )
 
     Node * curr_node = this->m_root;
 
-    auto curr = _str.begin();
-    std::cout << _str << std::endl;
-    while( curr != _str.end() )
+    std::queue<char> c_list;
+    for( auto &i : _str ) c_list.push(i);
+
+    while( !c_list.empty() )
     {
         // first, check if not already on a leaf
         if( curr_node->left == nullptr && curr_node->right == nullptr )
         {
-            std::cout << "\tgot-it " << curr_node->key << std::endl;
             decoded_str += curr_node->key;  // add the curr_node char to the str
             curr_node = this->m_root;       // reset curr_node to the root
 
-            std::advance( curr, 1 );
-            continue;
-        }
-            
-        if( *curr == '1' ) {
-            std::cout << "diggin right\n";
-            // dig right
-            curr_node = curr_node->right;
-        } else if ( *curr == '0' ) {
-            std::cout << "diggin left\n";
-            // dig left
-            curr_node = curr_node->left;
+        } else {
+                
+            if( c_list.front() == '1' ) {
+                // dig right
+                curr_node = curr_node->right;
+            } else if ( c_list.front() == '0' ) {
+                // dig left
+                curr_node = curr_node->left;
+            }
+
+            c_list.pop();
         }
 
-        std::advance(curr, 1);
     }
     return decoded_str;
 }
