@@ -12,6 +12,7 @@ namespace COMPRESS
 
         // insert delimiter
         binData += (char)0b00000000;
+        binData += (char)0b11111111;
 
         // BIT::printBits( "BinData Header", binData );
         
@@ -121,11 +122,23 @@ namespace COMPRESS
                 intrStr += c;
             }
 
-            if(seek(curr, sBits)) break;
+            auto valid_seek = curr;
+            size_t count = 0;
+            if(seek(curr, sBits)){
+                while( seek(curr, sBits) ){
+                    std::cout << std::distance(sBits.begin(), curr) << std::endl;
+                    std::advance(curr, 1);
+                }
+                std::advance(curr, 8+7);
+                break;
+            }
         }
 
         // not working properly!!
-        std::advance(curr, 8+2+2+1);  // advance 8 bits
+        // do {
+            // std::advance(curr, 8);
+        // } while(seek(curr, sBits));
+        // std::advance(curr, 8+2+2+1);  // advance 8 bits
 
         std::string compressedDataBits;
         while( curr != sBits.end() )
